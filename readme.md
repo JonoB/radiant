@@ -1,7 +1,7 @@
 # Radiant
 Self validating models for Laravel's Eloquent Orm
 
-**Note:** This package is heavily influenced by the Radiant bundle for Laravel 3.
+**Note:** This package is heavily influenced by the Aware bundle for Laravel 3.
 https://github.com/crabideau5691/Radiant
 
 ## Installation
@@ -82,7 +82,7 @@ $user->email = 'john@doe.com';
 $user->save(); // returns false if model is invalid
 ```
 
-**note:** You also can validate a model at an time using the `Radiant->valid()` method.
+**note:** You also can validate a model at any time using the `Radiant->valid()` method.
 
 <a name="errors"></a>
 ## Retrieving Errors
@@ -109,7 +109,7 @@ Radiant provides a convenient way to create callbacks on the `save()` method in 
 can create a `beforeSave()` and `afterSave()` method in each of your models.
 
 **Note:** The `beforeSave()` method should return `true` if you want the `save()` method to run. If
-the `beforeSave()` method return `false`, then the `save()` method will be intercepted.
+the `beforeSave()` method returns `false`, then the `save()` method will be intercepted.
 
 ```php
 class User extends Radiant {
@@ -134,7 +134,7 @@ the save action has successfully completed.
 Radiant also provides a way to create callbacks on the `delete()` method in your models.
 
 **Note:** The `beforeDelete()` method should return `true` if you want the `delete()` method to run. If
-the `beforeDelete()` method return `false`, then the `delete()` method will be intercepted.
+the `beforeDelete()` method returns `false`, then the `delete()` method will be intercepted.
 
 ```php
 class User extends Radiant {
