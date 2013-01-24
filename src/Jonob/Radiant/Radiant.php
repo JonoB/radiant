@@ -47,7 +47,7 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 		// if there are no rules, then assume everything is valid
 		if (empty($this->rules))
 		{
-			return $true;
+			return true;
 		}
 
 		// run the validator
