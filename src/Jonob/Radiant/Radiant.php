@@ -158,13 +158,11 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 			return false;
 		}
 
-		$keyName = $this->getKeyName();
+		$query = $this->newQuery();
 
 		// First we need to create a fresh query instance and touch the creation and
 		// update timestamp on the model which are maintained by us for developer
 		// convenience. Then we will just continue saving the model instances.
-		$query = $this->newQuery();
-
 		if ($this->timestamps)
 		{
 			$this->updateTimestamps();
@@ -181,9 +179,7 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 		// clause to only update this model. Otherwise, we'll just insert them.
 		if ($this->exists)
 		{
-			$query->where($keyName, '=', $this->getKey());
-
-			$query->update($this->attributes);
+			$saved = $this->performUpdate($query);
 		}
 
 		// If the model is brand new, we'll insert it into our database and set the
@@ -191,19 +187,16 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 		// which is typically an auto-increment value managed by the database.
 		else
 		{
-			if ($this->incrementing)
-			{
-				$this->$keyName = $query->insertGetId($this->attributes);
-			}
-			else
-			{
-				$query->insert($this->attributes);
-			}
+			$saved = $this->performInsert($query);
+
+			$this->exists = $saved;
 		}
 
 		// run afterSave
 		$this->afterSave();
 
-		return $this->exists = true;
+        $this->syncOriginal();
+
+		return $saved;
 	}
 }
