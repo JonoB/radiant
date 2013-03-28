@@ -8,11 +8,11 @@ https://github.com/crabideau5691/Radiant
 
 ### Composer
 
-Add `"jonob/radiant": ">=1.0.*"` to the `require` section of your `composer.json`:
+Add `"jonob/radiant": "dev-master"` to the `require` section of your `composer.json`:
 
 ```composer
 "require": {
-	"jonob/radiant": ">=1.0.*"
+	"jonob/radiant": "dev-master"
 },
 
 ```
@@ -44,7 +44,6 @@ so that it looks something like the following:
 * [Retrieving Errors](#errors)
 * [Messages](#messages)
 * [Save callbacks](#save)
-* [Delete callbacks](#delete)
 
 <a name="basic"></a>
 ## Basic
@@ -103,57 +102,10 @@ protected $messages = array(
 ```	
 
 <a name="save"></a>
-## Save Callbacks
+## Callbacks
 
-Radiant provides a convenient way to create callbacks on the `save()` method in your models. You 
-can create a `beforeSave()` and `afterSave()` method in each of your models.
+Note the callbacks have been completely removed from Radiant. This is because Laravel's Events are far 
+more flexible and powerful. I highly recommend that you hook into the saving, saved, creating, created,
+updating, updated, deleting and deleted events as needed.
 
-**Note:** The `beforeSave()` method should return `true` if you want the `save()` method to run. If
-the `beforeSave()` method returns `false`, then the `save()` method will be intercepted.
-
-```php
-class User extends Radiant {
-
-  public function beforeSave()
-  {
-    // Change the email to lowercase
-    $this->email = strtolower($this->email);
-
-    return true;
-  }
-
-}
-```
-
-You can also run afterSave() methods - this can include any action that you want to perform after
-the save action has successfully completed.
-
-<a name="delete"></a>
-## Delete Callbacks
-
-Radiant also provides a way to create callbacks on the `delete()` method in your models.
-
-**Note:** The `beforeDelete()` method should return `true` if you want the `delete()` method to run. If
-the `beforeDelete()` method returns `false`, then the `delete()` method will be intercepted.
-
-```php
-class User extends Radiant {
-
-  public function beforeDelete($user_id)
-  {
-    // We don't want to delete active users
-	$user = self::find($user_id);
-    if ( ! $user or $user->active)
-	{
-		// set a string in the session
-		Session::flash('error', 'Unable to delete that user');
-		return false;
-	}
-
-    return true;
-  }
-
-}
-```
-
-
+In fact, Radiant now uses the saving event to run the validator prior to the model being saved.
