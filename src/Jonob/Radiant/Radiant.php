@@ -1,7 +1,5 @@
 <?php namespace Jonob\Radiant;
 
-use \Illuminate\Support\Facades;
-
 class Radiant extends \Illuminate\Database\Eloquent\Model
 {
 	/**
@@ -24,6 +22,22 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	 * @var \support\MessageBag
 	 */
 	protected $errors;
+
+	/**
+	 * The https request method
+	 *
+	 * @var string $method
+	 */
+	private $httpMethod;
+
+
+	public function __construct(array $attributes = array())
+	{
+		parent::__construct($attributes);
+
+		$this->httpMethod = \Request::getMethod();
+		$this->createEventListener();
+	}
 
 	/**
 	 * Validate the Model
@@ -52,7 +66,7 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 
 		// run the validator
 		$validator = \Illuminate\Support\Facades\Validator::make($this->attributes, $this->rules, $this->messages);
-        $valid = $validator->passes();
+		$valid = $validator->passes();
 
 		// if validation fails, then grab all the error messages from the validator
 		if ( ! $valid)
@@ -74,129 +88,18 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	}
 
 	/**
-	 * Called before a model is deleted
+	 * Create an event listener on the save event if the http method is post
 	 *
-	 * @return bool
+	 * The event listener will listen for the saving event and validate the model
 	 */
-	public function beforeDelete()
+	private function createEventListener()
 	{
-		return true;
-	}
-
-	/**
-	 * Called after a model is deleted
-	 *
-	 * @return bool
-	 */
-	public function afterDelete()
-	{
-		return true;
-	}
-
-	/**
-	 * Called before a model is saved
-	 *
-	 * @return bool
-	 */
-	public function beforeSave()
-	{
-		return true;
-	}
-
-	/**
-	 * Called after a model is succesfully saved
-	 *
-	 * @return bool
-	 */
-	public function afterSave()
-	{
-		return true;
-	}
-
-	/**
-	 * Delete the model from the database.
-	 *
-	 * @return void
-	 */
-	public function delete()
-	{
-		if ($this->exists)
+		if ($this->httpMethod == 'POST')
 		{
-			// run beforeDelete
-			if ( ! $this->beforeDelete())
+			\Event::listen('eloquent.saving: '.get_called_class(), function()
 			{
-				return false;
-			}
-
-			$key = $this->getKeyName();
-
-			$delete = $this->newQuery()->where($key, $this->getKey())->delete();
-
-			// run after delete
-			if ($delete)
-			{
-				$this->afterDelete();
-			}
-
-			return $delete;
+				return $this->valid();
+			});
 		}
-	}
-
-	/**
-	 * Save the model to the database
-	 *
-	 * @param array $rules
-	 * @param array $messages
-	 * @return bool
-	 */
-	public function save($rules = array(), $messages = array())
-	{
-		// validate
-		$valid = $this->valid($rules, $messages);
-		if ( ! $valid)
-		{
-			return false;
-		}
-
-		$query = $this->newQuery();
-
-		// First we need to create a fresh query instance and touch the creation and
-		// update timestamp on the model which are maintained by us for developer
-		// convenience. Then we will just continue saving the model instances.
-		if ($this->timestamps)
-		{
-			$this->updateTimestamps();
-		}
-
-		// run beforeSave
-		if ( ! $this->beforeSave())
-		{
-			return false;
-		}
-
-		// If the model already exists in the database we can just update our record
-		// that is already in this database using the current IDs in this "where"
-		// clause to only update this model. Otherwise, we'll just insert them.
-		if ($this->exists)
-		{
-			$saved = $this->performUpdate($query);
-		}
-
-		// If the model is brand new, we'll insert it into our database and set the
-		// ID attribute on the model to the value of the newly inserted row's ID
-		// which is typically an auto-increment value managed by the database.
-		else
-		{
-			$saved = $this->performInsert($query);
-
-			$this->exists = $saved;
-		}
-
-		// run afterSave
-		$this->afterSave();
-
-        $this->syncOriginal();
-
-		return $saved;
 	}
 }
