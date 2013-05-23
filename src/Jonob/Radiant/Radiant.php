@@ -88,6 +88,14 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	}
 
 	/**
+	 * Set the validation rules
+	 */
+	public function setRules($rules = array())
+	{
+		$this->rules = $rules;
+	}
+
+	/**
 	 * Create an event listener on the save event if the http method is post
 	 *
 	 * The event listener will listen for the saving event and validate the model
@@ -96,9 +104,10 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	{
 		if ($this->httpMethod == 'POST')
 		{
-			\Event::listen('eloquent.saving: '.get_called_class(), function()
+			$host = $this;
+			\Event::listen('eloquent.saving: '.get_called_class(), function() use ($host)
 			{
-				return $this->valid();
+				return $host->valid();
 			});
 		}
 	}
