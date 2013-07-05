@@ -104,10 +104,9 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	{
 		if ($this->httpMethod == 'POST')
 		{
-			$host = $this;
-			\Event::listen('eloquent.saving: '.get_called_class(), function() use ($host)
+			\Event::listen('eloquent.saving: '.get_called_class(), function()
 			{
-				return $host->valid();
+				return $this->valid();
 			});
 		}
 	}
