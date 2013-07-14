@@ -102,7 +102,7 @@ class Radiant extends \Illuminate\Database\Eloquent\Model
 	 */
 	private function createEventListener()
 	{
-		if ($this->httpMethod == 'POST')
+		if (in_array($this->httpMethod, array('POST', 'PUT')))
 		{
 			\Event::listen('eloquent.saving: '.get_called_class(), function()
 			{
